@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Košík</title>
+    <style>
+        /* Styly pro jednoduchý vzhled stránky */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        nav {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .remove-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .order-form {
+            margin-top: 20px;
+        }
+
+        .order-form input, .order-form button {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+        }
+
+        .order-form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .total-price {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        #pickupPointButton {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #pickupPointButton:hover {
+            background-color: #0056b3;
+        }
+
+        #pickup-point-section {
+            display: none;
+        }
+
+        .notification {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: opacity 0.5s ease;
+        }
+
+        .shipping-cost {
+            margin-top: 10px;
+            font-weight: normal;
+            font-size: 18px;
+            color: #777;
+        }
+
+        .payment-method {
+            margin-top: 20px;
+        }
+
+        .payment-method label {
+            margin-right: 0px;
+        }
+
+        /* Posunout "hotově" doprava */
+        .payment-method label:nth-child(1) {
+            margin-left: 20px; /* Posune "hotově" o 20px doprava */
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Košík</h1>
+    </header>
+    <nav>
+        <a href="zg.html">Produkty</a>
+        <a href="hdhd.html">O mne</a>
+        <a href="hdhd2.html">Kontakt</a>
+        <a href="index.html">Domů</a>
+    </nav>
+    <section>
+        <ul id="cart-items"></ul>
+        
+        <div class="total-price" id="total-price"></div>
+        <div id="shipping-cost" class="shipping-cost"></div>
+
+        <form class="order-form" id="order-form">
+            <h2>Doručovací údaje</h2>
+            <input type="text" id="name" name="name" placeholder="Jméno a příjmení" required>
+            <input type="text" id="address" name="address" placeholder="Ulice a číslo domu" required>
+            <input type="text" id="city" name="city" placeholder="Město" required>
+            <input type="text" id="postal-code" name="postal-code" placeholder="PSČ" required>
+            <input type="tel" id="phone" name="phone" placeholder="Telefonní číslo" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+
+            <div class="form-group">
+                <h3>Způsob dopravy</h3>
+                <label>
+                    <input type="radio" name="deliveryMethod" value="dobirka" required> Dobírka
+                </label>
+                <label>
+                    <input type="radio" name="deliveryMethod" value="vydejni-misto" required> Výdejní místo
+                </label>
+            </div>
+
+            <div id="pickup-point-section" class="form-group">
+                <label for="pickupPoint">Vyberte místo vyzvednutí:</label>
+                <button type="button" id="pickupPointButton">Vybrat místo</button>
+                <input type="text" id="pickupPoint" name="pickupPoint" readonly>
+            </div>
+
+            <!-- Sekce pro výběr metody platby -->
+            <div class="payment-method">
+                <h3>Platba</h3>
+                <label>
+                    <input type="radio" name="paymentMethod" value="hotove" required> Hotově
+                </label>
+                <label>
+                    <input type="radio" name="paymentMethod" value="kartou" required> kartou
+                </label>
+            </div>
+
+            <button type="submit">Odeslat objednávku</button>
+        </form>
+
+        <!-- Notifikace -->
+        <div class="notification" id="notification">
+            Děkujeme za objednávku!
+        </div>
+
+        <!-- Formulář pro PayPal, který se zobrazí až po odeslání objednávky -->
+        <form id="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display: none;">
+            <input type="hidden" name="cmd" value="_s-xclick" />
+            <input type="hidden" name="hosted_button_id" value="WEL2BAGEND564" />
+            <input type="hidden" name="currency_code" value="CZK" />
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif" border="0" name="submit" title="PayPal – bezpečnější a jednodušší způsob placení online" alt="Koupit" />
+        </form>
+
+    </section>
+    <footer>
+        &copy; 2024 Vaše Společnost
+    </footer>
+
+    <script src="https://widget.packeta.com/v6/www/js/library.js"></script>
+    <script>
+        // Inicializace košíku
+        var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+        var shippingCost = 0; // Defaultní cena dopravy
+
+        var cartList = document.getElementById('cart-items');
+        var totalPriceElement = document.getElementById('total-price');
+        var shippingCostElement = document.getElementById('shipping-cost');
+        var notification = document.getElementById('notification');
+        var paypalForm = document.getElementById('paypal-form');
+
+        function updateCartDisplay() {
+            cartList.innerHTML = '';
+            var totalPrice = 0;
+
+            cartItems.forEach(function(item) {
+                var price = parseFloat(item.price);
+                var quantity = parseInt(item.quantity);
+                price = (price * quantity).toFixed(2);
+
+                var li = document.createElement('li');
+                li.textContent = item.name + ' - ' + price + ' Kč' + ' - ' + item.quantity + ' ks';
+
+                totalPrice += parseFloat(price);
+
+                var removeButton = document.createElement('button');
+                removeButton.textContent = 'ODSTRANIT';
+                removeButton.classList.add('remove-button');
+                removeButton.addEventListener('click', function() {
+                    cartItems = cartItems.filter(function(cartItem) {
+                        return cartItem.name !== item.name;
+                    });
+                    localStorage.setItem('cart', JSON.stringify(cartItems));
+                    updateCartDisplay();
+                });
+                li.appendChild(removeButton);
+
+                cartList.appendChild(li);
+            });
+
+            // Přičtení ceny dopravy
+            totalPrice += shippingCost;
+            totalPriceElement.textContent = 'Celková cena: ' + totalPrice.toFixed(2) + ' Kč';
+
+            if (shippingCost > 0) {
+                shippingCostElement.textContent = 'Cena dopravy: ' + shippingCost.toFixed(2) + ' Kč';
+            } else {
+                shippingCostElement.textContent = ''; // Skrytí ceny dopravy, pokud není zvolen způsob platby
+            }
+        }
+
+        updateCartDisplay();
+
+        document.getElementById('pickupPointButton').addEventListener('click', function() {
+            Packeta.Widget.pick({
+                appIdentity: 'your-app-identity',  // Zde vložte svůj App Identity
+                country: 'cz'
+            }, function(point) {
+                document.getElementById('pickupPoint').value = `${point.name}, ${point.city}`;
+            });
+        });
+
+        // Dynamická aktualizace ceny dopravy
+        document.querySelectorAll('input[name="deliveryMethod"]').forEach(function(elem) {
+            elem.addEventListener('change', function() {
+                if (this.value === 'dobirka' || this.value === 'vydejni-misto') {
+                    shippingCost = 99;
+                    document.getElementById('pickup-point-section').style.display = (this.value === 'vydejni-misto') ? 'block' : 'none';
+                } else {
+                    shippingCost = 0;
+                }
+                updateCartDisplay(); // Aktualizace celkové ceny
+            });
+        });
+
+        document.getElementById('order-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var orderDetails = {
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                postalCode: document.getElementById('postal-code').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                pickupPoint: document.getElementById('pickupPoint').value,
+                deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
+                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+                cartItems: cartItems
+            };
+
+            // Odeslat objednávku na server
+            fetch('sendOrder.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderDetails)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    notification.style.display = 'block';
+                    setTimeout(function() {
+                        notification.style.display = 'none';
+                    }, 3000);
+
+                    // Zobrazit PayPal tlačítko pro platbu
+                    paypalForm.style.display = 'block';
+
+                    // Vyprázdnit košík po odeslání objednávky
+                    localStorage.setItem('cart', JSON.stringify([]));
+                    cartItems = [];
+                    updateCartDisplay();
+                } else {
+                    alert('Chyba při odesílání objednávky.');
+                }
+            })
+            .catch(error => {
+                alert('Chyba při odesílání objednávky.');
+            });
+        });
+    </script>
+</body>
+</html>
