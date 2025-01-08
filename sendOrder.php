@@ -9,7 +9,7 @@ $message = "Děkujeme za vaši objednávku:\n" . print_r($data['cartItems'], tru
 mail($to, $subject, $message);
 
 // Odeslat email správci s podrobnými informacemi
-$adminEmail = "admin@example.com"; // Zde zadejte email správce
+$adminEmail = "jiri.krutina260@gmal.com; // Zde zadejte email správce
 $adminSubject = "Nová objednávka od " . $data['name'];
 $adminMessage = "Nová objednávka:\n" .
                 "Jméno: " . $data['name'] . "\n" .
