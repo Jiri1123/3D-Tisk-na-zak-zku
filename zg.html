@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produkty</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        nav {
+            background-color: #444;
+            color: #fff;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        .product {
+            margin-bottom: 20px;
+        }
+
+        .product h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .product p {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            color: green;
+            font-weight: bold;
+        }
+
+        .availability {
+            color: gray;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .remove-button {
+            background-color: #f44336;
+        }
+
+        .quantity-input {
+            width: 40px; /* Změna šířky pole pro množství */
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Styl pro modální okno */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .modal-header, .modal-footer {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .modal-header {
+            text-align: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Produkty</h1>
+        <nav>
+            <a href="index.html">Domů</a>
+            <a href="hdhd.html">O mně</a>
+            <a href="hdhd2.html">Kontakt</a>
+            <a href="Košík zv.html">Košík</a>
+        </nav>
+    </header>
+
+    <section>
+        <div class="product">
+            <img src="20250103_185854.jpg" alt="Obrázek produktu 1" width="200">
+            <h3>Býlí Axiotloter</h3>
+            <p class="price" data-price="199">199 Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Poslední kus</p>
+            <input type="number" class="quantity-input" id="quantity1" value="1" min="1">
+            <button class="button" onclick="addToCart('Pohyblivý had modrý', '199', document.getElementById('quantity1').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="1000020252.jpg" alt="Obrázek produktu 2" width="200">
+            <h3>Pohyblivá ještěrka modrá</h3>
+            <p class="price" data-price="329">329 Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 18 kusů</p>
+            <input type="number" class="quantity-input" id="quantity2" value="1" min="1">
+            <button class="button" onclick="addToCart('Pohyblivá ještěrka bílá', '329', document.getElementById('quantity2').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="IMG_20141005_213329_display_large.jpg"alt="Obrázek produktu 3" width="200">
+            <h3>Přívěsek na klíče yamaha</h3>
+            <p class="price" data-price="329">250Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 5 kusy</p>
+            <input type="number" class="quantity-input" id="quantity3" value="1" min="1">
+            <button class="button" onclick="addToCart('Přívěsek černý', '329', document.getElementById('quantity3').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="IMG115_display_large_display_large.jpg"alt="Obrázek produktu 3" width="200">
+            <h3>Přívěsek na klíče motorka</h3>
+            <p class="price" data-price="329">250Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 5 kusy</p>
+            <input type="number" class="quantity-input" id="quantity3" value="1" min="1">
+            <button class="button" onclick="addToCart('Přívěsek černý', '329', document.getElementById('quantity3').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="4c3b5b57e1_display_large.jpg"alt="Obrázek produktu 3" width="200">
+            <h3>Držáček na telefon drak</h3>
+            <p class="price" data-price="329">250Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 5 kusy</p>
+            <input type="number" class="quantity-input" id="quantity3" value="1" min="1">
+            <button class="button" onclick="addToCart('Přívěsek černý', '329', document.getElementById('quantity3').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="large_display_7530a267-9224-4f06-b8cd-82f8f569f68b.jpg"alt="Obrázek produktu 3" width="200">
+            <h3>Flexibilní kočka</h3>
+            <p class="price" data-price="329">250Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 5 kusy</p>
+            <input type="number" class="quantity-input" id="quantity3" value="1" min="1">
+            <button class="button" onclick="addToCart('Přívěsek černý', '329', document.getElementById('quantity3').value)">DO KOŠÍKU</button>
+        </div>
+        
+        <div class="product">
+            <img src="IMG135_display_large_display_large.jpg"alt="Obrázek produktu 3" width="200">
+            <h3>Přívěšek vlk</h3>
+            <p class="price" data-price="329">250Kč / <span class="price-eur">0</span> €</p>
+            <p class="availability">Skladem 5 kusy</p>
+            <input type="number" class="quantity-input" id="quantity3" value="1" min="1">
+            <button class="button" onclick="addToCart('Přívěsek černý', '329', document.getElementById('quantity3').value)">DO KOŠÍKU</button>
+        </div>
+    </section>
+
+    <!-- Modální okno -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Produkt přidán do košíku</h2>            
+            </div>
+            <div class="modal-body">
+                <table id="cartTable">
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Množství</th>
+                        <th>Cena</th>
+                    </tr>
+                </table>
+              <h3>Produkty co máte v košíku</h3>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Vaše Společnost
+    </footer>
+
+    <script>
+    const exchangeRate = 25; // Pevný kurz 25 Kč za 1 EUR
+
+    // Funkce pro přepočet cen z CZK na EUR
+    function updatePrices() {
+        const prices = document.querySelectorAll('.price');
+        prices.forEach(priceElement => {
+            const priceInCzk = parseFloat(priceElement.getAttribute('data-price'));
+            const priceInEur = (priceInCzk / exchangeRate).toFixed(2);
+            priceElement.querySelector('.price-eur').textContent = priceInEur;
+        });
+    }
+
+    // Funkce pro přidání produktu do košíku
+    function addToCart(productName, productPrice, quantity) {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        var found = false;
+        cart.forEach(item => {
+            if (item.name === productName) {
+                item.quantity = parseInt(item.quantity) + parseInt(quantity);
+                found = true;
+            }
+        });
+        if (!found) {
+            cart.push({ name: productName, price: productPrice, quantity: quantity });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // Aktualizace obsahu tabulky
+        updateCartDisplay();
+
+        // Zobrazení modálního okna
+        document.getElementById("cartModal").style.display = "block";
+    }
+
+    // Funkce pro zavření modálního okna
+    function closeModal() {
+        document.getElementById("cartModal").style.display = "none";
+    }
+
+    // Zavření modálního okna, když uživatel klikne mimo něj
+    window.onclick = function(event) {
+        var modal = document.getElementById("cartModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Funkce pro aktualizaci zobrazení košíku
+    function updateCartDisplay() {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        var table = document.getElementById("cartTable");
+        table.innerHTML = '<tr><th>Produkt</th><th>Množství</th><th>Cena</th></tr>';
+        cart.forEach(item => {
+            var row = table.insertRow();
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            cell1.innerHTML = item.name;
+            cell2.innerHTML = item.quantity;
+            cell3.innerHTML = item.price * item.quantity + ' Kč';
+        });
+    }
+
+    // Počáteční aktualizace cen v eurech
+    updatePrices();
+</script>
+</body>
+</html>    
