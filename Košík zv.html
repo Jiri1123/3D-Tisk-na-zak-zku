@@ -209,6 +209,36 @@
 
         var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
         var notification = document.getElementById('notification');
+        var cartItemsList = document.getElementById('cart-items');
+        var totalPriceElement = document.getElementById('total-price');
+
+        // Funkce pro zobrazení položek v košíku a celkové ceny
+        function updateCartDisplay() {
+            cartItemsList.innerHTML = '';
+            let totalPrice = 0;
+
+            cartItems.forEach(function(item, index) {
+                var li = document.createElement('li');
+                li.textContent = item.name + ' - ' + item.price + ' Kč';
+                var removeButton = document.createElement('button');
+                removeButton.textContent = 'Odstranit';
+                removeButton.classList.add('remove-button');
+                removeButton.addEventListener('click', function() {
+                    cartItems.splice(index, 1);
+                    localStorage.setItem('cart', JSON.stringify(cartItems));
+                    updateCartDisplay(); // Aktualizace zobrazení po odstranění položky
+                });
+                li.appendChild(removeButton);
+                cartItemsList.appendChild(li);
+
+                totalPrice += parseFloat(item.price);
+            });
+
+            totalPriceElement.textContent = 'Celková cena: ' + totalPrice + ' Kč';
+        }
+
+        // Počáteční zobrazení košíku
+        updateCartDisplay();
 
         document.getElementById('order-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -224,7 +254,7 @@
                 paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
                 pickupPoint: document.getElementById('pickupPoint').value,
                 cartItems: JSON.stringify(cartItems),
-                totalPrice: document.getElementById('total-price').textContent
+                totalPrice: totalPriceElement.textContent
             };
 
             var emailParams = {
@@ -243,6 +273,7 @@
 
                     localStorage.setItem('cart', JSON.stringify([]));
                     cartItems = [];
+                    updateCartDisplay(); // Vymazání košíku a aktualizace zobrazení
                 }, function(error) {
                     console.log('Chyba při odesílání emailu:', error);
                 });
