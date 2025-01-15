@@ -108,11 +108,16 @@
 
         .notification {
             display: none;
-            margin-top: 20px;
-            padding: 10px;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
             background-color: #4CAF50;
             color: white;
             border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             transition: opacity 0.5s ease;
         }
 
@@ -192,7 +197,6 @@
             <button type="submit">Odeslat objednávku</button>
         </form>
 
-        <!-- Notifikace -->
         <div class="notification" id="notification">
             Děkujeme za objednávku!
         </div>
@@ -201,10 +205,9 @@
         &copy; 3D tisk na zakázku
     </footer>
 
-    <!-- EmailJS knihovna -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        emailjs.init('xAqrb-k7uHIEld_64'); // Nahraďte 'YOUR_USER_ID' vaším uživatelským ID
+        emailjs.init('xAqrb-k7uHIEld_64'); 
 
         var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
         var notification = document.getElementById('notification');
@@ -212,7 +215,6 @@
         var totalPriceElement = document.getElementById('total-price');
         var shippingCostElement = document.getElementById('shipping-cost');
 
-        // Funkce pro zobrazení položek v košíku a celkové ceny
         function updateCartDisplay() {
             cartItemsList.innerHTML = '';
             let totalPrice = 0;
@@ -226,7 +228,7 @@
                 removeButton.addEventListener('click', function() {
                     cartItems.splice(index, 1);
                     localStorage.setItem('cart', JSON.stringify(cartItems));
-                    updateCartDisplay(); // Aktualizace zobrazení po odstranění položky
+                    updateCartDisplay();
                 });
                 li.appendChild(removeButton);
                 cartItemsList.appendChild(li);
@@ -234,30 +236,25 @@
                 totalPrice += parseFloat(item.price);
             });
 
-            // Cena za dopravu
             var deliveryCost = parseFloat(shippingCostElement.textContent) || 0;
-
             totalPriceElement.textContent = 'Celková cena: ' + (totalPrice + deliveryCost) + ' Kč';
         }
 
-        // Počáteční zobrazení košíku
         updateCartDisplay();
 
-        // Po výběru metody dopravy
         function updateShippingCost() {
             var shippingCost = 0;
             const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
             
             if (selectedDelivery) {
                 if (selectedDelivery.value === 'dobirka' || selectedDelivery.value === 'vydejni-misto') {
-                    shippingCost = 99; // Doprava za 99 Kč
+                    shippingCost = 99; 
                 }
             }
             shippingCostElement.textContent = 'Doprava: ' + shippingCost + ' Kč';
-            updateCartDisplay(); // Přepočítání celkové ceny
+            updateCartDisplay(); 
         }
 
-        // Přidání event listenerů pro změnu metody dopravy
         document.querySelector('input[name="deliveryMethod"]').addEventListener('change', updateShippingCost);
 
         document.getElementById('order-form').addEventListener('submit', function(event) {
@@ -292,29 +289,15 @@
                     }, 3000);
 
                     localStorage.setItem('cart', JSON.stringify([]));
-                                        cartItems = [];
-                    updateCartDisplay(); // Vymazání košíku a aktualizace zobrazení
+                    cartItems = [];
+                    updateCartDisplay();
                 })
                 .catch(function(error) {
                     console.log('Chyba při odesílání emailu: ', error);
                 });
 
-            // Vymazání formuláře po odeslání
             document.getElementById('order-form').reset();
             shippingCostElement.textContent = '';
-        });
-
-        // Ukázka pro výběr výdejního místa
-        document.getElementById('pickupPointButton').addEventListener('click', function() {
-            const pickupInput = document.getElementById('pickupPoint');
-            // Příklad možnosti výběru místa (ideálně by to byla nějaká API nebo jiná logika)
-            const places = ['Místo 1', 'Místo 2', 'Místo 3']; // Tři příklady míst
-            const selectedPlace = prompt('Vyberte místo: ' + places.join(', '));
-            if (places.includes(selectedPlace)) {
-                pickupInput.value = selectedPlace;
-            } else {
-                alert('Neplatná volba místa.');
-            }
         });
     </script>
 </body>
