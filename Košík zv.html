@@ -207,7 +207,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        emailjs.init('xAqrb-k7uHIEld_64'); 
+        emailjs.init('xAqrb-k7uHIEld_64');
 
         var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
         var notification = document.getElementById('notification');
@@ -221,7 +221,8 @@
 
             cartItems.forEach(function(item, index) {
                 var li = document.createElement('li');
-                li.textContent = item.name + ' - ' + item.price + ' Kč';
+                li.textContent = item.name + ' - ' + item.price + ' Kč x ' + item.quantity + ' = ' + (item.price * item.quantity) + ' Kč';
+
                 var removeButton = document.createElement('button');
                 removeButton.textContent = 'Odstranit';
                 removeButton.classList.add('remove-button');
@@ -230,10 +231,11 @@
                     localStorage.setItem('cart', JSON.stringify(cartItems));
                     updateCartDisplay();
                 });
+
                 li.appendChild(removeButton);
                 cartItemsList.appendChild(li);
 
-                totalPrice += parseFloat(item.price);
+                totalPrice += parseFloat(item.price) * item.quantity;
             });
 
             var deliveryCost = parseFloat(shippingCostElement.textContent) || 0;
