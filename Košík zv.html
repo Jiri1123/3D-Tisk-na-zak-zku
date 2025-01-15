@@ -260,47 +260,64 @@
         document.querySelector('input[name="deliveryMethod"]').addEventListener('change', updateShippingCost);
 
         document.getElementById('order-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+    event.preventDefault();
 
-            var orderDetails = {
-                name: document.getElementById('name').value,
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                postalCode: document.getElementById('postal-code').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
-                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-                pickupPoint: document.getElementById('pickupPoint').value,
-                cartItems: JSON.stringify(cartItems),
-                totalPrice: totalPriceElement.textContent
-            };
+    var orderDetails = {
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        postalCode: document.getElementById('postal-code').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+        pickupPoint: document.getElementById('pickupPoint').value,
+        cartItems: cartItems,
+        totalPrice: totalPriceElement.textContent
+    };
 
-            var emailParams = {
-                ...orderDetails,
-                from_name: orderDetails.name,
-                items: orderDetails.cartItems
-            };
+    // Formátování položek košíku (včetně názvu a množství)
+    var cartItemsText = '';
+    cartItems.forEach(function(item) {
+        cartItemsText += item.name + ' - Množství: ' + item.quantity + '<br>';
+    });
 
-            emailjs.send('service_hbi1syi', 'template_e7bu3hm', emailParams)
-                .then(function(response) {
-                    console.log('Úspěšně odesláno!', response.status, response.text);
-                    notification.style.display = 'block';
-                    setTimeout(function() {
-                        notification.style.display = 'none';
-                    }, 3000);
+    var emailParams = {
+        from_name: orderDetails.name,
+        name: orderDetails.name,
+        address: orderDetails.address,
+        city: orderDetails.city,
+        postalCode: orderDetails.postalCode,
+        phone: orderDetails.phone,
+        email: orderDetails.email,
+        deliveryMethod: orderDetails.deliveryMethod,
+        paymentMethod: orderDetails.paymentMethod,
+        pickupPoint: orderDetails.pickupPoint,
+        cartItems: cartItemsText,
+        totalPrice: orderDetails.totalPrice
+    };
 
-                    localStorage.setItem('cart', JSON.stringify([]));
-                    cartItems = [];
-                    updateCartDisplay();
-                })
-                .catch(function(error) {
-                    console.log('Chyba při odesílání emailu: ', error);
-                });
+    emailjs.send('service_hbi1syi', 'template_e7bu3hm', emailParams)
+        .then(function(response) {
+            console.log('Úspěšně odesláno!', response.status, response.text);
+            notification.style.display = 'block';
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 3000);
 
-            document.getElementById('order-form').reset();
-            shippingCostElement.textContent = '';
+            // Resetování košíku
+            localStorage.setItem('cart', JSON.stringify([]));
+            cartItems = [];
+            updateCartDisplay();
+        })
+        .catch(function(error) {
+            console.log('Chyba při odesílání emailu: ', error);
         });
+
+    document.getElementById('order-form').reset();
+    shippingCostElement.textContent = '';
+});
+
     </script>
 </body>
 </html>
