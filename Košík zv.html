@@ -150,7 +150,7 @@
     </nav>
     <section>
         <ul id="cart-items"></ul>
-        
+
         <div class="total-price" id="total-price"></div>
         <div id="shipping-cost" class="shipping-cost"></div>
 
@@ -169,12 +169,12 @@
                     <input type="radio" name="deliveryMethod" value="dobirka" required> Dobírka PPL
                 </label>
                 <label>
-                    <input type="radio" name="deliveryMethod" value="vydejni-misto" required> Výdejní místo
+                    <input type="radio" name="deliveryMethod" value="vydejni-misto" required> Výdejní místo Zásilovna
                 </label>
             </div>
 
             <div id="pickup-point-section" class="form-group">
-                <label for="pickupPoint">Vyberte místo vyzvednutí:Zásilkovna</label>
+                <label for="pickupPoint">Vyberte místo vyzvednutí:</label>
                 <button type="button" id="pickupPointButton">Vybrat místo</button>
                 <input type="text" id="pickupPoint" name="pickupPoint" readonly>
             </div>
@@ -197,95 +197,18 @@
         <div class="notification" id="notification">
             Děkujeme za objednávku!
         </div>
-
-        <!-- Formulář pro PayPal, který se zobrazí až po odeslání objednávky -->
-        <form id="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display: none;">
-            <input type="hidden" name="cmd" value="_s-xclick" />
-            <input type="hidden" name="hosted_button_id" value="WEL2BAGEND564" />
-            <input type="hidden" name="currency_code" value="CZK" />
-            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif" border="0" name="submit" title="PayPal – bezpečnější a jednodušší způsob placení online" alt="Koupit" />
-        </form>
-
     </section>
     <footer>
         &copy; 3D tisk na zakázku
     </footer>
 
-    <script src="https://widget.packeta.com/v6/www/js/library.js"></script>
+    <!-- EmailJS knihovna -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Inicializace košíku
+        emailjs.init('xAqrb-k7uHIEld_64'); // Nahraďte 'YOUR_USER_ID' vaším uživatelským ID
+
         var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-        var shippingCost = 0; // Defaultní cena dopravy
-
-        var cartList = document.getElementById('cart-items');
-        var totalPriceElement = document.getElementById('total-price');
-        var shippingCostElement = document.getElementById('shipping-cost');
         var notification = document.getElementById('notification');
-        var paypalForm = document.getElementById('paypal-form');
-
-        function updateCartDisplay() {
-            cartList.innerHTML = '';
-            var totalPrice = 0;
-
-            cartItems.forEach(function(item) {
-                var price = parseFloat(item.price);
-                var quantity = parseInt(item.quantity);
-                price = (price * quantity).toFixed(2);
-
-                var li = document.createElement('li');
-                li.textContent = item.name + ' - ' + price + ' Kč' + ' - ' + item.quantity + ' ks';
-
-                totalPrice += parseFloat(price);
-
-                var removeButton = document.createElement('button');
-                removeButton.textContent = 'ODSTRANIT';
-                removeButton.classList.add('remove-button');
-                removeButton.addEventListener('click', function() {
-                    cartItems = cartItems.filter(function(cartItem) {
-                        return cartItem.name !== item.name;
-                    });
-                    localStorage.setItem('cart', JSON.stringify(cartItems));
-                    updateCartDisplay();
-                });
-                li.appendChild(removeButton);
-
-                cartList.appendChild(li);
-            });
-
-            // Přičtení ceny dopravy
-            totalPrice += shippingCost;
-            totalPriceElement.textContent = 'Celková cena: ' + totalPrice.toFixed(2) + ' Kč';
-
-            if (shippingCost > 0) {
-                shippingCostElement.textContent = 'Cena dopravy: ' + shippingCost.toFixed(2) + ' Kč';
-            } else {
-                shippingCostElement.textContent = ''; // Skrytí ceny dopravy, pokud není zvolen způsob platby
-            }
-        }
-
-        updateCartDisplay();
-
-        document.getElementById('pickupPointButton').addEventListener('click', function() {
-            Packeta.Widget.pick({
-                appIdentity: 'your-app-identity',  // Zde vložte svůj App Identity
-                country: 'cz'
-            }, function(point) {
-                document.getElementById('pickupPoint').value = `${point.name}, ${point.city}`;
-            });
-        });
-
-        // Dynamická aktualizace ceny dopravy
-        document.querySelectorAll('input[name="deliveryMethod"]').forEach(function(elem) {
-            elem.addEventListener('change', function() {
-                if (this.value === 'dobirka' || this.value === 'vydejni-misto') {
-                    shippingCost = 99;
-                    document.getElementById('pickup-point-section').style.display = (this.value === 'vydejni-misto') ? 'block' : 'none';
-                } else {
-                    shippingCost = 0;
-                }
-                updateCartDisplay(); // Aktualizace celkové ceny
-            });
-        });
 
         document.getElementById('order-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -297,42 +220,44 @@
                 postalCode: document.getElementById('postal-code').value,
                 phone: document.getElementById('phone').value,
                 email: document.getElementById('email').value,
-                pickupPoint: document.getElementById('pickupPoint').value,
                 deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
                 paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-                cartItems: cartItems
+                pickupPoint: document.getElementById('pickupPoint').value,
+                cartItems: JSON.stringify(cartItems),
+                totalPrice: document.getElementById('total-price').textContent
             };
 
-            // Odeslat objednávku na server
-            fetch('sendOrder.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderDetails)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
+            var emailParams = {
+                ...orderDetails,
+                from_name: orderDetails.name,
+                items: orderDetails.cartItems
+            };
+
+            emailjs.send('service_hbi1syi', 'template_e7bu3hm', emailParams)
+                .then(function(response) {
+                    console.log('Úspěšně odesláno!', response.status, response.text);
                     notification.style.display = 'block';
                     setTimeout(function() {
                         notification.style.display = 'none';
                     }, 3000);
 
-                    // Zobrazit PayPal tlačítko pro platbu
-                    paypalForm.style.display = 'block';
-
-                    // Vyprázdnit košík po odeslání objednávky
                     localStorage.setItem('cart', JSON.stringify([]));
                     cartItems = [];
-                    updateCartDisplay();
-                } else {
-                    alert('Chyba při odesílání objednávky.');
-                }
-            })
-            .catch(error => {
-                alert('Chyba při odesílání objednávky.');
-            });
+                }, function(error) {
+                    console.log('Chyba při odesílání emailu:', error);
+                });
+        });
+
+        document.getElementById('pickupPointButton').addEventListener('click', function() {
+            alert('Zde můžete integrovat funkčnost pro výběr výdejního místa.');
+        });
+
+        document.querySelector('input[name="deliveryMethod"][value="vydejni-misto"]').addEventListener('change', function() {
+            document.getElementById('pickup-point-section').style.display = 'block';
+        });
+
+        document.querySelector('input[name="deliveryMethod"][value="dobirka"]').addEventListener('change', function() {
+            document.getElementById('pickup-point-section').style.display = 'none';
         });
     </script>
 </body>
