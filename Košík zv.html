@@ -135,7 +135,6 @@
         .payment-method label:nth-child(1) {
             margin-left: 20px; /* Posune "hotově" o 20px doprava */
         }
-
     </style>
 </head>
 <body>
@@ -211,6 +210,7 @@
         var notification = document.getElementById('notification');
         var cartItemsList = document.getElementById('cart-items');
         var totalPriceElement = document.getElementById('total-price');
+        var shippingCostElement = document.getElementById('shipping-cost');
 
         // Funkce pro zobrazení položek v košíku a celkové ceny
         function updateCartDisplay() {
@@ -234,11 +234,31 @@
                 totalPrice += parseFloat(item.price);
             });
 
-            totalPriceElement.textContent = 'Celková cena: ' + totalPrice + ' Kč';
+            // Cena za dopravu
+            var deliveryCost = parseFloat(shippingCostElement.textContent) || 0;
+
+            totalPriceElement.textContent = 'Celková cena: ' + (totalPrice + deliveryCost) + ' Kč';
         }
 
         // Počáteční zobrazení košíku
         updateCartDisplay();
+
+        // Po výběru metody dopravy
+        function updateShippingCost() {
+            var shippingCost = 0;
+            const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
+            
+            if (selectedDelivery) {
+                if (selectedDelivery.value === 'dobirka' || selectedDelivery.value === 'vydejni-misto') {
+                    shippingCost = 99; // Doprava za 99 Kč
+                }
+            }
+            shippingCostElement.textContent = 'Doprava: ' + shippingCost + ' Kč';
+            updateCartDisplay(); // Přepočítání celkové ceny
+        }
+
+        // Přidání event listenerů pro změnu metody dopravy
+        document.querySelector('input[name="deliveryMethod"]').addEventListener('change', updateShippingCost);
 
         document.getElementById('order-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -272,23 +292,29 @@
                     }, 3000);
 
                     localStorage.setItem('cart', JSON.stringify([]));
-                    cartItems = [];
+                                        cartItems = [];
                     updateCartDisplay(); // Vymazání košíku a aktualizace zobrazení
-                }, function(error) {
-                    console.log('Chyba při odesílání emailu:', error);
+                })
+                .catch(function(error) {
+                    console.log('Chyba při odesílání emailu: ', error);
                 });
+
+            // Vymazání formuláře po odeslání
+            document.getElementById('order-form').reset();
+            shippingCostElement.textContent = '';
         });
 
+        // Ukázka pro výběr výdejního místa
         document.getElementById('pickupPointButton').addEventListener('click', function() {
-            alert('Zde můžete integrovat funkčnost pro výběr výdejního místa.');
-        });
-
-        document.querySelector('input[name="deliveryMethod"][value="vydejni-misto"]').addEventListener('change', function() {
-            document.getElementById('pickup-point-section').style.display = 'block';
-        });
-
-        document.querySelector('input[name="deliveryMethod"][value="dobirka"]').addEventListener('change', function() {
-            document.getElementById('pickup-point-section').style.display = 'none';
+            const pickupInput = document.getElementById('pickupPoint');
+            // Příklad možnosti výběru místa (ideálně by to byla nějaká API nebo jiná logika)
+            const places = ['Místo 1', 'Místo 2', 'Místo 3']; // Tři příklady míst
+            const selectedPlace = prompt('Vyberte místo: ' + places.join(', '));
+            if (places.includes(selectedPlace)) {
+                pickupInput.value = selectedPlace;
+            } else {
+                alert('Neplatná volba místa.');
+            }
         });
     </script>
 </body>
