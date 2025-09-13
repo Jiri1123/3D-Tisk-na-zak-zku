@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Košík</title>
+
+    <!-- Packeta (Zásilkovna) Widget -->
+    <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
+
     <style>
-        /* Styly pro jednoduchý vzhled stránky */
+        /* ZACHOVANÝ STYL */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -18,10 +22,6 @@
             background-color: #333;
             color: #fff;
             padding: 20px 0;
-        }
-
-        h1 {
-            margin-top: 0;
         }
 
         nav {
@@ -66,7 +66,8 @@
             margin-top: 20px;
         }
 
-        .order-form input, .order-form button {
+        .order-form input,
+        .order-form button {
             margin-bottom: 10px;
             padding: 10px;
             width: calc(100% - 22px);
@@ -84,6 +85,12 @@
             margin-top: 20px;
             font-weight: bold;
             font-size: 20px;
+        }
+
+        .shipping-cost {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #777;
         }
 
         .form-group {
@@ -121,24 +128,16 @@
             transition: opacity 0.5s ease;
         }
 
-        .shipping-cost {
-            margin-top: 10px;
-            font-weight: normal;
-            font-size: 18px;
-            color: #777;
-        }
-
         .payment-method {
             margin-top: 20px;
         }
 
         .payment-method label {
-            margin-right: 0px;
+            margin-right: 0;
         }
 
-        /* Posunout "hotově" doprava */
         .payment-method label:nth-child(1) {
-            margin-left: 20px; /* Posune "hotově" o 20px doprava */
+            margin-left: 20px;
         }
     </style>
 </head>
@@ -146,26 +145,28 @@
     <header>
         <h1>Košík</h1>
     </header>
+
     <nav>
         <a href="zg.html">Produkty</a>
         <a href="hdhd.html">O mně</a>
         <a href="hdhd2.html">Kontakt</a>
         <a href="index.html">Domů</a>
     </nav>
+
     <section>
         <ul id="cart-items"></ul>
 
         <div class="total-price" id="total-price"></div>
-        <div id="shipping-cost" class="shipping-cost"></div>
+        <div id="shipping-cost" class="shipping-cost" data-cost="0"></div>
 
         <form class="order-form" id="order-form">
             <h2>Doručovací údaje</h2>
-            <input type="text" id="name" name="name" placeholder="Jméno a příjmení" required>
-            <input type="text" id="address" name="address" placeholder="Ulice a číslo domu" required>
-            <input type="text" id="city" name="city" placeholder="Město" required>
-            <input type="text" id="postal-code" name="postal-code" placeholder="PSČ" required>
-            <input type="tel" id="phone" name="phone" placeholder="Telefonní číslo" required>
-            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="text" id="name" placeholder="Jméno a příjmení" required>
+            <input type="text" id="address" placeholder="Ulice a číslo domu" required>
+            <input type="text" id="city" placeholder="Město" required>
+            <input type="text" id="postal-code" placeholder="PSČ" required>
+            <input type="tel" id="phone" placeholder="Telefonní číslo" required>
+            <input type="email" id="email" placeholder="Email" required>
 
             <div class="form-group">
                 <h3>Způsob dopravy</h3>
@@ -178,146 +179,166 @@
             </div>
 
             <div id="pickup-point-section" class="form-group">
-                <label for="pickupPoint">Vyberte místo vyzvednutí:</label>
+                <label for="pickupPoint">Vyberte místo vyzvednutí:</label><br>
                 <button type="button" id="pickupPointButton">Vybrat místo</button>
                 <input type="text" id="pickupPoint" name="pickupPoint" readonly>
             </div>
 
-            <!-- Sekce pro výběr metody platby -->
             <div class="payment-method">
                 <h3>Platba</h3>
                 <label>
                     <input type="radio" name="paymentMethod" value="hotove" required> Hotově
                 </label>
                 <label>
-                    <input type="radio" name="paymentMethod" value="kartou" required> Kartou !!Opravujeme Chybu nefunkční!! 
+                    <input type="radio" name="paymentMethod" value="kartou" required> Kartou !!Opravujeme Chybu nefunkční!!
                 </label>
             </div>
 
             <button type="submit">Odeslat objednávku</button>
         </form>
 
-        <div class="notification" id="notification">
-            Děkujeme za objednávku!
-        </div>
+        <div class="notification" id="notification">Děkujeme za objednávku!</div>
     </section>
+
     <footer>
         &copy; 3D tisk na zakázku
     </footer>
 
+    <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
     <script>
-        emailjs.init('xAqrb-k7uHIEld_64');
+        document.addEventListener('DOMContentLoaded', function () {
+            emailjs.init('xAqrb-k7uHIEld_64');
 
-        var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-        var notification = document.getElementById('notification');
-        var cartItemsList = document.getElementById('cart-items');
-        var totalPriceElement = document.getElementById('total-price');
-        var shippingCostElement = document.getElementById('shipping-cost');
+            var cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+            var notification = document.getElementById('notification');
+            var cartItemsList = document.getElementById('cart-items');
+            var totalPriceElement = document.getElementById('total-price');
+            var shippingCostElement = document.getElementById('shipping-cost');
 
-        function updateCartDisplay() {
-            cartItemsList.innerHTML = '';
-            let totalPrice = 0;
+            function updateCartDisplay() {
+                cartItemsList.innerHTML = '';
+                let totalPrice = 0;
 
-            cartItems.forEach(function(item, index) {
-                var li = document.createElement('li');
-                li.textContent = item.name + ' - ' + item.price + ' Kč x ' + item.quantity + ' = ' + (item.price * item.quantity) + ' Kč';
+                cartItems.forEach(function(item, index) {
+                    var li = document.createElement('li');
+                    li.textContent = item.name + ' - ' + item.price + ' Kč x ' + item.quantity + ' = ' + (item.price * item.quantity) + ' Kč';
 
-                var removeButton = document.createElement('button');
-                removeButton.textContent = 'Odstranit';
-                removeButton.classList.add('remove-button');
-                removeButton.addEventListener('click', function() {
-                    cartItems.splice(index, 1);
-                    localStorage.setItem('cart', JSON.stringify(cartItems));
-                    updateCartDisplay();
+                    var removeButton = document.createElement('button');
+                    removeButton.textContent = 'Odstranit';
+                    removeButton.classList.add('remove-button');
+                    removeButton.addEventListener('click', function() {
+                        cartItems.splice(index, 1);
+                        localStorage.setItem('cart', JSON.stringify(cartItems));
+                        updateCartDisplay();
+                    });
+
+                    li.appendChild(removeButton);
+                    cartItemsList.appendChild(li);
+
+                    totalPrice += parseFloat(item.price) * item.quantity;
                 });
 
-                li.appendChild(removeButton);
-                cartItemsList.appendChild(li);
+                var deliveryCost = parseFloat(shippingCostElement.dataset.cost) || 0;
+                totalPriceElement.textContent = 'Celková cena: ' + (totalPrice + deliveryCost) + ' Kč';
+            }
 
-                totalPrice += parseFloat(item.price) * item.quantity;
+            updateCartDisplay();
+
+            function updateShippingCost() {
+                let shippingCost = 0;
+                const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
+
+                if (selectedDelivery) {
+                    if (selectedDelivery.value === 'dobirka') {
+                        shippingCost = 99;
+                        document.getElementById('pickup-point-section').style.display = 'none';
+                    } else if (selectedDelivery.value === 'vydejni-misto') {
+                        shippingCost = 99;
+                        document.getElementById('pickup-point-section').style.display = 'block';
+                    }
+                }
+
+                shippingCostElement.textContent = 'Doprava: ' + shippingCost + ' Kč';
+                shippingCostElement.dataset.cost = shippingCost;
+                updateCartDisplay();
+            }
+
+            document.querySelectorAll('input[name="deliveryMethod"]').forEach(function(radio) {
+                radio.addEventListener('change', updateShippingCost);
             });
 
-            var deliveryCost = parseFloat(shippingCostElement.textContent) || 0;
-            totalPriceElement.textContent = 'Celková cena: ' + (totalPrice + deliveryCost) + ' Kč';
-        }
+            // Packeta widget
+            document.getElementById('pickupPointButton').addEventListener('click', function () {
+                Packeta.Widget.pick({
+                    appIdentity: 'eshop',
+                    language: 'cs',
+                    country: 'CZ',
+                    onPick: function(point) {
+                        document.getElementById('pickupPoint').value = point.name + ', ' + point.street + ', ' + point.city;
+                    }
+                });
+            });
 
-        updateCartDisplay();
+            // Odeslání formuláře
+            document.getElementById('order-form').addEventListener('submit', function(event) {
+                event.preventDefault();
 
-        function updateShippingCost() {
-            var shippingCost = 0;
-            const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
-            
-            if (selectedDelivery) {
-                if (selectedDelivery.value === 'dobirka' || selectedDelivery.value === 'vydejni-misto') {
-                    shippingCost = 99; 
-                }
-            }
-            shippingCostElement.textContent = 'Doprava: ' + shippingCost + ' Kč';
-            updateCartDisplay(); 
-        }
+                var orderDetails = {
+                    name: document.getElementById('name').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    postalCode: document.getElementById('postal-code').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
+                    paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+                    pickupPoint: document.getElementById('pickupPoint').value,
+                    cartItems: cartItems,
+                    totalPrice: totalPriceElement.textContent
+                };
 
-        document.querySelector('input[name="deliveryMethod"]').addEventListener('change', updateShippingCost);
+                var cartItemsText = '';
+                cartItems.forEach(function(item) {
+                    cartItemsText += item.name + ' - Množství: ' + item.quantity + '<br>';
+                });
 
-        document.getElementById('order-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+                var emailParams = {
+                    from_name: orderDetails.name,
+                    name: orderDetails.name,
+                    address: orderDetails.address,
+                    city: orderDetails.city,
+                    postalCode: orderDetails.postalCode,
+                    phone: orderDetails.phone,
+                    email: orderDetails.email,
+                    deliveryMethod: orderDetails.deliveryMethod,
+                    paymentMethod: orderDetails.paymentMethod,
+                    pickupPoint: orderDetails.pickupPoint,
+                    cartItems: cartItemsText,
+                    totalPrice: orderDetails.totalPrice
+                };
 
-    var orderDetails = {
-        name: document.getElementById('name').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        postalCode: document.getElementById('postal-code').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
-        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-        pickupPoint: document.getElementById('pickupPoint').value,
-        cartItems: cartItems,
-        totalPrice: totalPriceElement.textContent
-    };
+                emailjs.send('service_hbi1syi', 'template_e7bu3hm', emailParams)
+                    .then(function(response) {
+                        console.log('Úspěšně odesláno!', response.status, response.text);
+                        notification.style.display = 'block';
+                        setTimeout(function () {
+                            notification.style.display = 'none';
+                        }, 3000);
 
-    // Formátování položek košíku (včetně názvu a množství)
-    var cartItemsText = '';
-    cartItems.forEach(function(item) {
-        cartItemsText += item.name + ' - Množství: ' + item.quantity + '<br>';
-    });
+                        localStorage.setItem('cart', JSON.stringify([]));
+                        cartItems = [];
+                        updateCartDisplay();
+                    })
+                    .catch(function(error) {
+                        console.log('Chyba při odesílání emailu:', error);
+                    });
 
-    var emailParams = {
-        from_name: orderDetails.name,
-        name: orderDetails.name,
-        address: orderDetails.address,
-        city: orderDetails.city,
-        postalCode: orderDetails.postalCode,
-        phone: orderDetails.phone,
-        email: orderDetails.email,
-        deliveryMethod: orderDetails.deliveryMethod,
-        paymentMethod: orderDetails.paymentMethod,
-        pickupPoint: orderDetails.pickupPoint,
-        cartItems: cartItemsText,
-        totalPrice: orderDetails.totalPrice
-    };
-
-    emailjs.send('service_hbi1syi', 'template_e7bu3hm', emailParams)
-        .then(function(response) {
-            console.log('Úspěšně odesláno!', response.status, response.text);
-            notification.style.display = 'block';
-            setTimeout(function() {
-                notification.style.display = 'none';
-            }, 3000);
-
-            // Resetování košíku
-            localStorage.setItem('cart', JSON.stringify([]));
-            cartItems = [];
-            updateCartDisplay();
-        })
-        .catch(function(error) {
-            console.log('Chyba při odesílání emailu: ', error);
+                document.getElementById('order-form').reset();
+                shippingCostElement.textContent = '';
+            });
         });
-
-    document.getElementById('order-form').reset();
-    shippingCostElement.textContent = '';
-});
-
     </script>
 </body>
 </html>
